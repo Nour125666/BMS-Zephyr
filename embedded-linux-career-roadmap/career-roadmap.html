@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Becoming a Highly Hireable Linux / Embedded Linux Engineer</title>
+<style>
+  @page { size: A4; margin: 14mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font: 10.5pt/1.42 "Segoe UI", Arial, sans-serif; color: #1a2233; margin: 0; }
+  h1 { font-size: 20pt; margin: 0 0 2pt; color: #0b3d91; }
+  .sub { color: #55627a; font-size: 9.5pt; margin: 0 0 10pt; }
+  h2 { font-size: 12.5pt; color: #0b3d91; margin: 14pt 0 4pt; border-bottom: 1px solid #cdd7ea; padding-bottom: 2pt; }
+  h3 { font-size: 10.5pt; margin: 8pt 0 2pt; color: #22314f; }
+  p { margin: 3pt 0; }
+  ul { margin: 3pt 0 3pt 16pt; padding: 0; }
+  li { margin: 1.5pt 0; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0; }
+  th, td { border: 1px solid #c3cfe2; padding: 3pt 5pt; text-align: left; vertical-align: top; font-size: 9.8pt; }
+  th { background: #eef3fb; color: #0b3d91; }
+  .box { border: 1px solid #c3cfe2; border-left: 4px solid #0b3d91; background: #f6f9fe; padding: 6pt 8pt; margin: 6pt 0; }
+  .tag { display: inline-block; background: #eef3fb; color: #0b3d91; border: 1px solid #c3cfe2; border-radius: 10px; padding: 1pt 7pt; font-size: 8.6pt; margin: 1pt 2pt 1pt 0; }
+  code { background: #eef1f6; padding: 0 3px; border-radius: 3px; font-family: Consolas, monospace; font-size: 9.4pt; }
+  .two { display: flex; gap: 12pt; }
+  .two > div { flex: 1; }
+  .footer { margin-top: 10pt; padding-top: 4pt; border-top: 1px solid #cdd7ea; color: #7a8699; font-size: 8.6pt; }
+  .avoid-break { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<h1>Becoming a Highly Hireable Linux / Embedded Linux Engineer</h1>
+<p class="sub">A practical, artifact-driven roadmap — targeting Canonical and comparable companies. Tunisia &amp; remote-friendly.</p>
+
+<h2>1. Pick the right sub-role first</h2>
+<p>"Linux engineer" is four different jobs. Canonical hires for all of them, with different bars.</p>
+<table class="avoid-break">
+  <tr><th>Sub-role</th><th>What you do</th><th>Canonical equivalent</th></tr>
+  <tr><td>Distro / systems</td><td>packaging, systemd, kernel userspace, servers</td><td>Ubuntu Engineer, Linux Systems Engineer</td></tr>
+  <tr><td>Kernel</td><td>drivers, subsystems, debugging (highest bar, needs upstream)</td><td>Kernel Engineer</td></tr>
+  <tr><td>Embedded Linux</td><td>BSP, Yocto/Buildroot, U-Boot, drivers, bring-up</td><td>Embedded / Field Engineer</td></tr>
+  <tr><td>Cloud / infra</td><td>Kubernetes, LXD, MAAS, Juju, OpenStack</td><td>Software / Cloud Engineer</td></tr>
+  <tr><td>Support / Field</td><td>customer-facing debugging, travel</td><td>Support Engineer, Field Engineer</td></tr>
+</table>
+<p><b>Start with Embedded Linux or Support/Field.</b> Your industrial + support background and your RTOS/BMS project map there. Kernel roles are a later goal after real patches.</p>
+
+<h2>2. What Canonical specifically rewards</h2>
+<ul>
+  <li><b>Open-source contribution.</b> The single biggest lever: merged patches beat certificates. Adopt a Debian/Ubuntu package, fix bugs, become an Ubuntu Member / Debian Maintainer, publish a snap.</li>
+  <li><b>Written communication.</b> The application is essay-based; English writing and clear argument are screened hard.</li>
+  <li><b>Ubuntu/Debian packaging depth:</b> <code>debhelper</code>, <code>debian/rules</code>, <code>sbuild</code>/<code>pbuilder</code>, <code>lintian</code>, <code>autopkgtest</code>, PPAs, <code>snapcraft</code>.</li>
+  <li><b>Languages:</b> Python (their main), plus Go, Rust, C, shell.</li>
+  <li><b>Products:</b> Ubuntu Core, snapd, cloud-init, netplan, LXD, MAAS, Juju, MicroCloud/OpenStack.</li>
+</ul>
+<p>Canonical is <b>remote-first and hires in many countries</b> — check current listings for your location. The process is long: essay application → written interview → take-home/technical → interviews.</p>
+
+<h2>3. Knowledge checklist (by return on effort)</h2>
+<div class="two">
+<div>
+<h3>Tier 1 — non-negotiable</h3>
+<ul>
+  <li>Linux internals: processes, <code>/proc</code>, cgroups/namespaces, systemd (units, journald), udev, D-Bus, permissions.</li>
+  <li>C (real mastery), Python, Bash, Git, Make/CMake/Meson.</li>
+  <li>Debugging: gdb, strace, perf, ftrace, dmesg, bpftrace, tcpdump.</li>
+  <li>Networking: TCP/IP, routing, netfilter, DNS, sockets.</li>
+</ul>
+<h3>Tier 2 — embedded Linux</h3>
+<ul>
+  <li>Cross-compilation, crosstool-NG, U-Boot, kernel config, device tree.</li>
+  <li>Yocto (plus Buildroot): layers, recipes, bitbake, SDK.</li>
+  <li>Driver model, IIO/I2C/SPI subsystems.</li>
+  <li>Boot: initramfs, rootfs, A/B updates (RAUC/SWUpdate/Mender).</li>
+</ul>
+</div>
+<div>
+<h3>Tier 3 — distro / cloud (Canonical-flavored)</h3>
+<ul>
+  <li>Debian packaging end-to-end; snap packaging; sbuild + lintian + autopkgtest.</li>
+  <li>Containers (Docker/podman) and LXD; KVM/QEMU.</li>
+  <li>Kubernetes basics, Terraform, MAAS/Juju concepts.</li>
+</ul>
+<div class="box">
+<b>Portfolio artifacts matter more than courses.</b> One merged upstream patch &gt; ten tutorials. Aim for 2–4 shipped artifacts plus a board running an image <i>you</i> built.
+</div>
+</div>
+</div>
+
+<h2>4. Projects (each is a portfolio artifact)</h2>
+<ol>
+  <li><b>Package your BMS tooling as a <code>.deb</code> + a snap</b>, publish to a PPA and the Snap Store, automate with GitHub Actions.</li>
+  <li><b>Build a Yocto image</b> for a Raspberry Pi / BeagleBone running a <code>systemd</code> service that talks to your STM32 over UART/RS485 — an embedded-Linux gateway for your BMS.</li>
+  <li><b>Write a Linux IIO driver</b> for an INA219/INA226 current sensor and submit it to the mailing list (the review is the credential).</li>
+  <li><b>A/B OTA updates</b> with RAUC or SWUpdate, including rollback.</li>
+  <li><b>Metrics gateway:</b> MQTT → InfluxDB → Grafana fed by your board (networking + cloud + ops).</li>
+  <li><b>Upstream something small:</b> a device-tree entry, a Zephyr driver, or a Debian package fix.</li>
+  <li><b>D-Bus + udev</b> service reacting to device hotplug.</li>
+  <li><b>Reproducible-build container</b> for your Zephyr project, used in CI.</li>
+</ol>
+<p>Do projects 1 and 2 first — they make you "look like a Linux engineer" fastest.</p>
+
+<h2>5. Books and courses</h2>
+<div class="two">
+<div>
+<h3>Start here</h3>
+<ul>
+  <li><i>How Linux Works</i> — Brian Ward.</li>
+  <li><i>The Linux Command Line</i> — William Shotts (free PDF).</li>
+  <li><b>Bootlin free training materials</b> (bootlin.com/docs): Embedded Linux, kernel, drivers, real-time — the best free embedded-Linux curriculum.</li>
+</ul>
+<h3>Core references</h3>
+<ul>
+  <li><i>The Linux Programming Interface</i> — Michael Kerrisk (bible).</li>
+  <li><i>Mastering Embedded Linux Programming</i> — Chris Simmonds (3rd ed.).</li>
+  <li><i>Linux Device Drivers</i> (LDD3, free) — Corbet, Rubini, Kroah-Hartman.</li>
+  <li><i>Linux Device Driver Development</i> — John Madieu.</li>
+  <li><i>Linux Kernel Development</i> — Robert Love.</li>
+  <li><i>Linux Kernel Programming</i> Parts 1–2 — Kaiwan Billimoria.</li>
+  <li>kernelnewbies.org, docs.kernel.org, elinux.org, Yocto Mega-Manual.</li>
+</ul>
+</div>
+<div>
+<h3>Courses</h3>
+<ul>
+  <li>Linux Foundation: <b>LFD450</b> (Embedded Linux), <b>LFD103</b> (kernel beginner), <b>LFCS</b>.</li>
+  <li>Coursera (UC Boulder): <i>Advanced Embedded Linux</i> / <i>Linux Kernel Programming</i>.</li>
+  <li>Bootlin paid training (very high quality) and free slides.</li>
+</ul>
+<h3>Certifications</h3>
+<p>LFCS, LPIC-1, RHCSA help HR filters but <b>do not replace contributions</b> for Canonical. Treat them as optional.</p>
+<h3>Packaging docs</h3>
+<ul>
+  <li>Debian New Maintainers' Guide.</li>
+  <li>Ubuntu Packaging Guide.</li>
+  <li>snapcraft.io documentation.</li>
+</ul>
+</div>
+</div>
+
+<h2>6. Canonical application strategy</h2>
+<ol>
+  <li>Get <b>2–4 merged upstream contributions</b> (Debian/Ubuntu package, a snap, a kernel/Zephyr patch).</li>
+  <li>Publish a short <b>technical blog series</b> on your BMS→Linux gateway; link it everywhere.</li>
+  <li>Apply to <b>Support / Field / Embedded / Ubuntu Engineer</b> roles — not Kernel first.</li>
+  <li>Write the essays with <b>concrete stories and measurable outcomes</b>; have someone proofread.</li>
+  <li>Practice their take-home style: articulate trade-offs in writing, not only code.</li>
+  <li>Target remote listings open to your country; your support/industrial experience is a real advantage in Support/Field tracks.</li>
+</ol>
+
+<h2>7. A realistic 12-month plan</h2>
+<table class="avoid-break">
+  <tr><th>Months</th><th>Focus</th><th>Deliverable</th></tr>
+  <tr><td>1–3</td><td>Linux internals, C/shell, systemd</td><td>BMS tools packaged as .deb + snap; first Debian package contribution</td></tr>
+  <tr><td>4–6</td><td>Yocto BSP, board bring-up, a driver</td><td>Board running your BMS gateway as a systemd service</td></tr>
+  <tr><td>7–9</td><td>Upstream patch, OTA, observability</td><td>Submitted kernel/Zephyr/Debian patch; RAUC/SWUpdate + metrics stack; published snap + PPA</td></tr>
+  <tr><td>10–12</td><td>Apply + interview</td><td>Canonical application + peers (Red Hat, SUSE, Collabora, Igalia, Linaro, Bootlin, Pengutronix, BayLibre, Toradex, ARM)</td></tr>
+</table>
+
+<h2>8. Honest verdict</h2>
+<p>Canonical is one of the more <b>reachable</b> top-tier Linux employers for someone without elite credentials: they hire globally, remote-first, and weight aptitude, writing, and open source over pedigree — but their written screen eliminates most applicants. The formula that works:</p>
+<p><span class="tag">one real board</span><span class="tag">an image you built (Yocto/Buildroot)</span><span class="tag">packaging (.deb + snap)</span><span class="tag">at least one merged upstream patch</span><span class="tag">strong English writing</span></p>
+<p>Certificates are optional; artifacts are not. Your Zephyr/BMS project becomes a strong supporting piece once you wrap a Linux gateway around it — and it already gives you a credible embedded story most "Linux-only" candidates lack.</p>
+
+<div class="footer">Prepared as a personal roadmap. Verify current role openings and interview steps on the company's careers site; hiring processes and available locations change.</div>
+
+</body>
+</html>

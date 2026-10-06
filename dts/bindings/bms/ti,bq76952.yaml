@@ -1,0 +1,25 @@
+description: Texas Instruments BQ76952 3S-16S battery monitor/protector
+
+compatible: "ti,bq76952"
+
+include: i2c-device.yaml
+
+properties:
+  alert-gpios:
+    type: phandle-array
+    required: false
+    description: ALERT signal from the BQ76952 to the host MCU.
+
+  rst-shut-gpios:
+    type: phandle-array
+    required: false
+    description: Host control of the BQ76952 RST_SHUT pin.
+
+  dfetoff-gpios:
+    type: phandle-array
+    required: false
+    description: Optional host control of BQ76952 DFETOFF/BOTHOFF input.
+
+  crc-enabled:
+    type: boolean
+    description: Enable BQ I2C CRC framing. Legacy STARZ 16S firmware uses CRC disabled.

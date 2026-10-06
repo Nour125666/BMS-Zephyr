@@ -1,0 +1,19 @@
+description: STARZ BMS board-level GPIO wiring not owned by a peripheral driver
+
+compatible: "starz,bms-board-io"
+
+properties:
+  rs485-de-re-gpios:
+    type: phandle-array
+    required: true
+    description: RS485 half-duplex transceiver driver-enable control.
+
+  buzzer-gpios:
+    type: phandle-array
+    required: false
+    description: Audible buzzer output.
+
+  start-gpios:
+    type: phandle-array
+    required: false
+    description: Wake/start pushbutton input.

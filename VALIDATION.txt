@@ -1,0 +1,42 @@
+Pure protection module host build:
+gcc -std=c11 -Wall -Wextra -Werror
+
+PASS: protection policy host tests
+
+Zephyr-specific runtime/state/event modules require the user's Zephyr build environment.
+
+Balancing policy host build:
+  gcc -std=c11 -Wall -Wextra -Werror
+
+PASS: balancing policy host tests
+
+PASS: estimator host tests
+
+v0.6 estimator compiled with gcc -std=c11 -Wall -Wextra -Werror.
+Zephyr runtime integration should be built in the user's existing NCS/Zephyr workspace.
+
+PASS: config + persistence store host tests
+PASS: estimator persisted-state host tests
+
+v0.7 config/store and estimator persisted-state code compiled with gcc -std=c11 -Wall -Wextra -Werror.
+Full Zephyr integration should be built in the user's NCS/Zephyr workspace.
+
+PASS: CAN + RS485 protocol host tests
+
+v0.8 pure CAN/RS485 protocol compiled with gcc -std=c11 -Wall -Wextra -Werror.
+Communication service/shell integration is intended for the user's Zephyr/NCS native_sim build.
+
+PASS: system health policy host tests
+
+v0.9 pure system-health policy compiled with gcc -std=c11 -Wall -Wextra -Werror.
+The Zephyr supervisor/watchdog/scenario integration must be built and run in the user's existing NCS/Zephyr native_sim workspace.
+
+
+FINAL PROJECT CONSOLIDATION v1.0
+- Native virtual runtime retained.
+- Real BQ I2C transport integrated by instance ID / Devicetree node.
+- STM32F446 16S overlay added.
+- STM32F446 32S reference overlay added (I2C1 bottom, I2C2+ISO1640 top).
+- STM32 CAN/RS485 and watchdog backend source added.
+- Optional NVS backend source added; disabled by default pending final flash map.
+- Full Zephyr builds must be executed in the user's NCS/Zephyr workspace.

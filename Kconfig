@@ -1,0 +1,70 @@
+mainmenu "STARZ scalable BMS"
+
+choice BMS_PLATFORM
+    prompt "BMS platform"
+    default BMS_PLATFORM_NATIVE_SIM
+
+config BMS_PLATFORM_NATIVE_SIM
+    bool "Zephyr native_sim virtual BQ platform"
+
+config BMS_PLATFORM_STM32F446
+    bool "STM32F446ZE hardware platform"
+endchoice
+
+choice BMS_PACK_PROFILE
+    prompt "Pack hardware topology"
+    default BMS_PACK_32S if BMS_PLATFORM_NATIVE_SIM
+    default BMS_PACK_16S if BMS_PLATFORM_STM32F446
+
+config BMS_PACK_16S
+    bool "Single BQ76952, maximum 16S"
+
+config BMS_PACK_32S
+    bool "Two stacked BQ76952 monitors, maximum 32S"
+endchoice
+
+config BMS_MONITOR_MAX_CELLS
+    int
+    default 16
+
+config BMS_MAX_CELLS
+    int
+    default 32
+
+config BMS_TOPOLOGY_MAX_MONITORS
+    int
+    default 4
+
+config BMS_EVENT_LOG_CAPACITY
+    int
+    default 32
+    range 8 128
+
+config BMS_REMOTE_CONFIG_WRITE
+    bool "Allow remote RS485 configuration writes"
+    default y if BMS_PLATFORM_NATIVE_SIM
+    default n
+
+config BMS_HW_ACTUATION_ENABLE
+    bool "Allow runtime FET and balancing actuation on physical hardware"
+    default y if BMS_PLATFORM_NATIVE_SIM
+    default n
+    help
+      Keep this disabled during STM32 bring-up. When disabled, protection,
+      topology, state-machine and balancing decisions still run, but normal
+      runtime commands do not switch FETs or enable cell balancing.
+
+config BMS_STM32_USE_HW_WATCHDOG
+    bool "Use STM32 hardware independent watchdog"
+    depends on BMS_PLATFORM_STM32F446
+    default y
+
+config BMS_STM32_USE_NVS
+    bool "Use STM32 internal-flash NVS backend"
+    depends on BMS_PLATFORM_STM32F446
+    default n
+    help
+      Requires a storage_partition Devicetree node. An optional reference
+      overlay is included, but flash partitioning must be reviewed before use.
+
+source "Kconfig.zephyr"
