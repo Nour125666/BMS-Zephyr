@@ -1,0 +1,388 @@
+STM32F446 Logic Analyzer — KiCad Design Specification V1.0
+Design baseline
+This is your reference for designing the complete PCB in KiCad. It covers the component selection, footprints, electrical connections, power supply, CAN interface, signal capture and PCB design rules.
+
+The goal is a minimal, professionally designed, USB-powered logic analyzer, using standard KiCad libraries, with no custom symbols or footprints.
+1. Hardware specifications
+Parameter	Design target
+MCU	STM32F446RET6
+Core	Cortex-M4, up to 180 MHz
+Flash / SRAM	512 KB / 128 KB + 4 KB CCM
+Digital channels	6 (D0–D5)
+CAN	1 classical CAN interface (CAN-H/CAN-L)
+Logic voltage	3.3 V only
+USB	USB 2.0 Full Speed
+Power	5 V from USB
+Internal supply	3.3 V LDO
+Programming	External ST-LINK using SWD
+Capture	Timer-controlled sampling; DMA to be validated
+Software	STM32 firmware + PyQt PC application
+PCB	Four-layer FR-4, 1.6 mm
+Assembly	IPC Class 2 target
+Estimated board size	70 × 50 mm, preliminary
+
+Important: CAN-H and CAN-L are two physical bus connections, not two independent sampled GPIO channels. Your board will provide six sampled GPIO channels and one decoded CAN bus.
+
+The STM32F446RE is confirmed by ST's documentation, and its matching KiCad symbol is in the published standard libraries. 
+Product - STMicroelectronics+1
+
+2. Complete MCU pin assignments
+Use the exact KiCad symbol:
+
+MCU_ST_STM32F4:STM32F446RETx
+
+Use the footprint:
+
+Package_QFP:LQFP-64_10x10mm_P0.5mm
+Capture and communication signals
+Signal	STM32 pin	Physical pin	Function
+D0	PC0	8	Digital input
+D1	PC1	9	Digital input
+D2	PC2	10	Digital input
+D3	PC3	11	Digital input
+D4	PC4	24	Digital input
+D5	PC5	25	Digital input
+CAN_RX	PB8	61	CAN1_RX, AF9
+CAN_TX	PB9	62	CAN1_TX, AF9
+USB_DM	PA11	44	USB Full Speed D−
+USB_DP	PA12	45	USB Full Speed D+
+SWDIO	PA13	46	Programming/debug
+SWCLK	PA14	49	Programming/debug
+SWO	PB3	55	Optional trace
+LED_POWER	—	—	Direct 3.3 V power indicator
+LED_STATUS	PB0	26	MCU status
+LED_CAN	PB1	27	CAN activity
+TRIGGER	PA0	14	Optional external trigger
+
+Use the six PC pins because they can all be read in a single GPIOC->IDR operation. This is a proposed firmware-efficient mapping, not proof of a particular DMA throughput.
+
+Source: ST DS10693 LQFP64 pinout, and STM32F446 reference manual RM0390. 
+STMicroelectronics+2
+
+Essential power and control pins
+Physical pin	Name	Connection
+1	VBAT	3.3 V (no backup battery)
+5	PH0 / OSC_IN	8 MHz crystal
+6	PH1 / OSC_OUT	8 MHz crystal
+7	NRST	Reset circuit and SWD
+12	VSSA	GND
+13	VDDA	Filtered 3.3 V
+18, 32, 47, 63	VSS	GND
+19, 33, 48, 64	VDD	3.3 V
+31	VCAP_1	2.2 µF to GND
+60	BOOT0	10 kΩ to GND
+
+Correction to our earlier discussion: the STM32F446RE LQFP64 has only one externally accessible VCAP pin, so use one 2.2 µF VCAP capacitor, not two. This is explicitly stated in ST's package-specific power-supply documentation. 
+STMicroelectronics+1
+
+3. KiCad component list and footprints
+Everything in the table below is intended to use an existing KiCad symbol and footprint.
+Ref.	Part / value	KiCad symbol	KiCad footprint
+U1	STM32F446RET6	MCU_ST_STM32F4:STM32F446RETx	Package_QFP:LQFP-64_10x10mm_P0.5mm
+U2	AP2112K-3.3TRG1	Regulator_Linear:AP2112K-3.3	Package_TO_SOT_SMD:SOT-23-5
+U3	SN65HVD230DR	Interface_CAN_LIN:SN65HVD230	Package_SO:SOIC-8_3.9x4.9mm_P1.27mm
+U4	USBLC6-2SC6	Power_Protection:USBLC6-2SC6	Package_TO_SOT_SMD:SOT-23-6
+J1	Molex 105017-0001	Connector:USB_B_Micro	Connector_USB:USB_Micro-B_Molex-105017-0001
+J2	2×6 pin header	Connector_Generic:Conn_02x06_Odd_Even	Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical
+J3	3-pin CAN terminal	Connector_Generic:Conn_01x03	TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal
+J4	2×5 SWD header	Connector_Generic:Conn_02x05_Odd_Even	Connector_PinHeader_1.27mm:PinHeader_2x05_P1.27mm_Vertical
+R	0603 resistors	Device:R	Resistor_SMD:R_0603_1608Metric
+C	0603 capacitors	Device:C	Capacitor_SMD:C_0603_1608Metric
+LED	0603 LEDs	Device:LED	LED_SMD:LED_0603_1608Metric
+SW1	Reset switch	Switch:SW_Push	Button_Switch_SMD:SW_SPST_TL3301AF160QG
+JP1	CAN termination selector	Jumper:Jumper_2_Open	Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm
+
+The standard-library entries for the MCU, CAN transceiver, regulator, USB ESD device and Molex USB connector are verified. The remaining header, switch and jumper footprints should be checked in your installed KiCad version, with the purchased physical parts matched to their drawings. 
+GitLab+5
+
+
+No SnapEDA or Ultra Librarian imports should be needed for these selected standard footprints. Verify pad numbering and orientation before ordering.
+
+One component remains to be finalized: the 8 MHz crystal, because its capacitor requirements depend on the exact crystal purchased. Use Device:Crystal with a matching standard 3.2 × 2.5 mm footprint.
+4. Schematic design — exact net connections
+Sheet A — USB and 3.3 V power
+Power distribution
+
+Use these net names in KiCad:
+USB_VBUS
+USB_5V_FUSED
++3V3
+GND
+USB_DP
+USB_DM
+NRST
+BOOT0
+
+
+LDO connections
+J1.VBUS          -> F1 -> USB_5V_FUSED
+USB_5V_FUSED     -> U2.VIN
+USB_5V_FUSED     -> U2.EN
+U2.VOUT          -> +3V3
+U2.GND           -> GND
+
+C1 = 1uF   USB_5V_FUSED to GND
+C2 = 1uF   +3V3 to GND
+C3 = 10uF  +3V3 to GND (optional bulk)
+
+
+Use an appropriately selected USB VBUS resettable fuse, typically around 500 mA hold current for a low-power USB-powered design, after calculating the actual board power consumption. This is a design starting point, not a verified USB current budget.
+
+USB data connections
+J1.D+  -> USB_DP -> U1.PA12
+J1.D-  -> USB_DM -> U1.PA11
+
+U4 USBLC6-2SC6:
+Protect both USB_DP and USB_DM.
+Connect VBUS and GND according to ST datasheet.
+
+J1.ID       -> NC
+J1.GND      -> GND
+J1.SHIELD   -> chassis/shield scheme (review for EMC)
+
+
+Place U4 close to the USB connector. Add a VBUS sense connection to a suitable MCU pin if using the USB device stack's VBUS sensing feature, or explicitly configure the firmware for operation without that sense input.
+
+For USB Full Speed, the MCU requires an accurate 48 MHz peripheral clock. Configure this from the PLL using the HSE crystal. ST documents this requirement in its USB hardware guidelines. 
+STMicroelectronics+1
+
+Sheet B — MCU core, boot, reset and oscillator
+U1.VDD pins 19,33,48,64 -> +3V3
+U1.VSS pins 18,32,47,63 -> GND
+U1.VBAT pin 1           -> +3V3
+
+U1.VDDA pin 13          -> +3V3 through optional
+                           filter / 0 ohm link
+U1.VSSA pin 12          -> GND
+
+U1.VCAP_1 pin 31        -> C_VCAP = 2.2uF -> GND
+
+U1.BOOT0 pin 60         -> R_BOOT = 10k -> GND
+U1.NRST pin 7           -> SW_RESET -> GND
+
+U1.PH0 pin 5            -> Crystal terminal 1
+U1.PH1 pin 6            -> Crystal terminal 2
+Crystal terminal 1      -> C_LOAD1 -> GND
+Crystal terminal 2      -> C_LOAD2 -> GND
+
+
+Add one 100 nF capacitor close to each VDD pin, plus one local 4.7 µF capacitor. For VDDA, use 100 nF + 1 µF decoupling close to the MCU.
+
+For the crystal, start with an 8 MHz SMD crystal and calculate its two load capacitors using its specified load capacitance and estimated PCB stray capacitance. Do not blindly assume 18 pF or 22 pF.
+
+For SWD, I recommend the standard ARM Cortex 10-pin, 1.27 mm pinout, rather than a custom header:
+J4 pin	Signal
+1	+3V3 reference
+2	SWDIO (PA13)
+3	GND
+4	SWCLK (PA14)
+5	GND
+6	SWO (PB3), optional
+7	Key / no pin
+8	NC
+9	GND
+10	NRST
+
+Check that the exact chosen connector supports the keyed ARM cable arrangement. A generic 2×5 pin header may not provide physical keying.
+Sheet C — six digital capture channels
+Use J2 as a 2×6 connector with each input beside its own ground.
+J2 pin	Signal	J2 pin	Signal
+1	D0	2	GND
+3	D1	4	GND
+5	D2	6	GND
+7	D3	8	GND
+9	D4	10	GND
+11	D5	12	GND
+
+One channel shown. Repeat for D0–D5, with suitable low-capacitance protection connected to ground.
+Connections:
+J2.1  -> R_D0 (100R) -> U1.PC0
+J2.3  -> R_D1 (100R) -> U1.PC1
+J2.5  -> R_D2 (100R) -> U1.PC2
+J2.7  -> R_D3 (100R) -> U1.PC3
+J2.9  -> R_D4 (100R) -> U1.PC4
+J2.11 -> R_D5 (100R) -> U1.PC5
+
+J2.2,4,6,8,10,12 -> GND
+
+
+For each channel, include a low-capacitance ESD protection footprint near the connector. A suitable 3.3 V-compatible protection part and its clamping behavior must be verified before release. The resistor is not sufficient overvoltage protection.
+
+Do not connect 5 V, 12 V, 24 V or battery-pack voltages to these inputs. This version is intended for 0–3.3 V signals with a shared ground.
+
+For floating signals, unknown ground potentials or industrial wiring, a separate buffered or isolated input design is required.
+Sheet D — CAN interface
+Use SN65HVD230DR, with its existing KiCad symbol.
+U3 pin	Signal	Connection
+1	D	PB9 (CAN_TX)
+2	GND	GND
+3	VCC	+3V3
+4	R	PB8 (CAN_RX)
+5	VREF	NC
+6	CANL	J3 CAN-L
+7	CANH	J3 CAN-H
+8	RS	+3V3 for permanent passive listen-only
+
+
+Use the following connection plan:
+U1.PB9        -> U3.D
+U3.R          -> U1.PB8
+
+U3.VCC        -> +3V3
+U3.GND        -> GND
+
+U3.RS         -> +3V3
+
+U3.CANH       -> CAN_H -> J3.1
+U3.CANL       -> CAN_L -> J3.2
+J3.3          -> GND
+
+C_CAN = 100nF between U3.VCC and GND
+
+
+Tie RS high for a permanently passive analyzer. TI confirms this disables the transmitter while retaining the receiver. In firmware, also enable CAN controller silent mode as a second precaution. 
+TI.com+1
+
+
+CAN termination:
+CAN_H -> JP1 -> R_TERM (120R) -> CAN_L
+
+
+The termination is disconnected by default. Close the jumper only when your analyzer is at a bus end and the network needs that termination. For ordinary CAN monitoring, leave it open.
+
+Add a CAN-rated TVS device near J3 before connecting to a real network. Keep the bus lines short and close together on the PCB.
+
+Because this CAN circuit is non-isolated, do not use it on a bus with an unknown or unsafe ground relationship to your USB-connected PC.
+Sheet E — LEDs, trigger and test points
+Reference	Component	Connection
+D1	Green LED	+3V3 through 1 kΩ to LED, then GND
+D2	Blue LED	PB0 → 1 kΩ → LED → GND
+D3	Yellow LED	PB1 → 1 kΩ → LED → GND
+TP1	Test point	+3V3
+TP2	Test point	GND
+TP3	Test point	NRST
+TP4	Test point	USB_DP
+TP5	Test point	USB_DM
+TP6	Test point	PA0 trigger, optional
+
+For the two GPIO-driven LEDs, use active-high firmware outputs. The 1 kΩ resistors provide modest LED current; confirm acceptable brightness with the actual LEDs.
+5. BOM with preliminary quantities
+Part/value	Quantity	Purpose
+STM32F446RET6	1	Main MCU
+SN65HVD230DR	1	CAN interface
+AP2112K-3.3TRG1	1	3.3 V regulator
+USBLC6-2SC6	1	USB ESD
+Molex 105017-0001	1	USB Micro-B
+8 MHz crystal	1	Main clock
+Crystal load capacitors	2	HSE circuit
+2.2 µF capacitor	1	VCAP
+100 nF capacitors	6–8	MCU, CAN and supply decoupling
+1 µF capacitors	3–4	LDO and VDDA
+4.7/10 µF bulk capacitor	1–2	Power rail
+100 Ω resistors	6	Digital input series resistance
+1 kΩ resistors	3	LEDs
+10 kΩ resistor	1	BOOT0
+120 Ω resistor	1	CAN termination
+0 Ω resistor	1	Optional VDDA link
+Digital input ESD clamps	6 channels	Input protection
+CAN TVS	1	CAN bus ESD/transient protection
+USB fuse	1	VBUS input protection
+Reset switch	1	MCU reset
+Status LEDs	3	Power/status/CAN
+Digital header	1	2×6
+CAN terminal block	1	3-pin
+SWD header	1	2×5
+CAN solder jumper	1	Termination selection
+PCB test points	6	Debugging
+
+Most of the passives can be 0603. The VCAP capacitor should meet ST's capacitance and ESR requirements at operating conditions, not merely have a nominal value of 2.2 µF.
+
+The quantities above are schematic planning quantities. The final BOM will include exact manufacturer part numbers for each crystal, connector, clamp, fuse, capacitor and switch.
+6. PCB fabrication and IPC rules
+Use the following as your initial KiCad board-setup specification.
+Parameter	Initial value
+PCB layers	4
+Board thickness	1.6 mm
+Copper weight	1 oz outer
+Minimum track	0.15 mm
+Preferred signal track	0.20 mm
+Power track	0.4–0.6 mm initially
+Minimum clearance	0.15 mm
+Via drill	0.30 mm
+Via diameter	0.60 mm
+Surface finish	ENIG preferred
+Solder mask	Both sides
+Silkscreen	Both sides where useful
+Assembly class	IPC Class 2 target
+
+These are design starting values, not a claim of IPC certification. Have the manufacturer confirm its fabrication rules and stackup. For USB impedance, use the manufacturer-calculated trace geometry rather than assuming a fixed trace width.
+Layer organization
+Layer	Function
+F.Cu	Components and main signals
+In1.Cu	Continuous GND
+In2.Cu	3.3 V / power distribution and secondary signals
+B.Cu	Secondary signals
+
+Keep the ground plane unbroken under USB and fast digital paths. Place the MCU decoupling capacitors next to their respective pins, keep the crystal close to PH0/PH1, and put ESD clamps nearest the external connectors.
+
+Label the PCB clearly: D0–D5, GND, CAN_H, CAN_L, 3V3, SWD, USB and REV A.
+7. Firmware architecture
+Capture data path
+
+Plan for two independent paths:
+
+Digital capture: Configure PC0–PC5 as inputs without pull resistors unless a particular test requires them. Use a timer for sample timing. First implement an interrupt-driven prototype, then validate whether a timer/DMA arrangement can read GPIOC->IDR on this MCU as intended. Do not assume a DMA request path exists without checking RM0390.
+
+CAN capture: Configure PB8/PB9 as CAN1 RX/TX, alternate function AF9, with the CAN controller in silent mode. The external RS pin is already tied high to prevent physical transmission.
+
+For the PC application, I recommend a simple protocol containing a capture identifier, sample rate, trigger configuration, sample buffer and overflow flags. Keep captured CAN frames and sampled GPIO traces in separate timestamped streams.
+Capture performance
+Use 1 MS/s as the first benchmark, then test 2 MS/s and 5 MS/s. These are targets, not promised hardware capabilities.
+
+A 64 KiB buffer holding one byte per sample would record:
+Sample rate	Capture duration
+1 MS/s	65.5 ms
+2 MS/s	32.8 ms
+5 MS/s	13.1 ms
+
+You cannot stream 5 MB/s continuously over USB Full Speed; capture-then-transfer is the straightforward approach for the first version.
+8. Important decisions before PCB manufacturing
+There are four unresolved design-validation items:
+1. Digital protection: Select the exact six-channel ESD solution and verify its capacitance, leakage and clamping voltage. A real 5 V-tolerant or 24 V-tolerant analyzer requires a different front end.
+2. USB connector and crystal: Confirm the exact purchasing part numbers, footprint pad numbers and oscillator loading.
+3. CAN TVS and bus environment: Select protection for the intended CAN bus voltage/transient conditions, and decide whether galvanic isolation is required.
+4. Firmware timing: Validate the STM32 timer, GPIO sampling and DMA approach on the STM32F446 before finalizing any capture-rate specification.
+These do not prevent you from starting the schematic tonight, but they should be resolved before sending the board for fabrication.
+9. Datasheets and KiCad reference links
+These are the references to keep with the project:
+- STM32F446RE product information and datasheet
+- STM32F446 documentation and RM0390 reference manual
+- SN65HVD230 CAN transceiver
+- AP2112 regulator datasheet
+- USBLC6 ESD datasheet
+- Official KiCad STM32F4 symbol library
+- Official KiCad USB connector footprint library
+- ST application note AN4879 — USB PCB design
+10. Order of work when you open KiCad
+KiCad implementation checklist
+
+0/12
+
+
+
+[ ] Create a new STM32_Logic_Analyzer project
+[ ] Create USB_Power, MCU_Core, Digital_Inputs, CAN_Interface, and Debug_Status sheets
+[ ] Place U1 STM32F446RETx and assign LQFP64 footprint
+[ ] Wire MCU VDD, VSS, VBAT, VDDA, VSSA and VCAP_1
+[ ] Add crystal, BOOT0, reset and SWD
+[ ] Build USB and LDO power circuit
+[ ] Create six PC0–PC5 capture inputs
+[ ] Add SN65HVD230 CAN interface and termination jumper
+[ ] Add LEDs, trigger and test points
+[ ] Finalize exact protection components and crystal
+[ ] Run ERC; compare every pin against datasheets
+[ ] Assign and check footprints, then start PCB layout
+
+Final design recommendation: Keep revision A as a six-channel 3.3 V logic analyzer with passive CAN, USB Full Speed and SWD. It is a manageable project for learning PCB design, embedded firmware, hardware debugging and host-side protocol analysis without introducing unnecessary complexity.
+
+The first schematic sheet to complete is MCU_Core, because it establishes the power pins, clock, reset and programming connections that every other sheet depends on.
